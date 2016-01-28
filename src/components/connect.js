@@ -1,5 +1,5 @@
 import 'whatwg-fetch'
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import isPlainObject from '../utils/isPlainObject'
 import deepValue from '../utils/deepValue'
 import shallowEqual from '../utils/shallowEqual'
@@ -24,6 +24,9 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
   // Helps track hot reloading.
   const version = nextVersion++
 
+  // Filled by the contextProvider
+  let _context;
+
   function coerceMappings(rawMappings) {
     invariant(
       isPlainObject(rawMappings),
@@ -39,6 +42,8 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
   }
 
   function coerceMapping(prop, mapping) {
+    const { baseUrl, authToken } = _context;
+
     if (Function.prototype.isPrototypeOf(mapping)) {
       return mapping
     }
@@ -52,6 +57,11 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
     invariant(!(mapping.url && mapping.value), 'Request object for `%s` must not have both `url` and `value` attributes.', prop)
 
     mapping = assignDefaults(mapping)
+
+    // Add baseUrl
+    mapping.url = `${baseUrl}${mapping.url}`;
+    // Add an authentication header.
+    mapping.headers.Authorization = `bearer ${authToken}`;
 
     mapping.equals = function (that) {
       if (this.comparison !== undefined) {
@@ -70,7 +80,7 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
     return Object.assign(
       {
         method: 'GET',
-        credentials: 'same-origin',
+        credentials: 'cors',
         redirect: 'follow'
       },
       mapping,
@@ -107,10 +117,16 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
 
   return function wrapWithConnect(WrappedComponent) {
     class RefetchConnect extends Component {
+      static contextTypes = {
+        baseUrl: PropTypes.string.isRequired,
+        authToken: PropTypes.string.isRequired,
+      };
+
       constructor(props, context) {
         super(props, context)
         this.version = version
         this.state = { mappings: {}, startedAts: {}, data: {}, refreshTimeouts: {} }
+        _context = context
       }
 
       componentWillMount() {
@@ -146,7 +162,7 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
       }
 
       refetchDataFromMappings(mappings) {
-        mappings = coerceMappings(mappings)
+        mappings = coerceMappings(mappings, this.context)
         Object.keys(mappings).forEach(prop => {
           const mapping = mappings[prop]
 
