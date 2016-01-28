@@ -2,7 +2,7 @@
   "name": "react-refetch",
   "version": "0.7.0-beta.1",
   "description": "A simple, declarative, and composable way to fetch data for React components.",
-  "main": "./src/index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "build": "babel src --out-dir lib",
     "clean": "rimraf lib dist coverage",

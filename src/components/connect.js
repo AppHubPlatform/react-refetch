@@ -25,7 +25,7 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
   const version = nextVersion++
 
   // Filled by the contextProvider
-  let _context;
+  let _context
 
   function coerceMappings(rawMappings) {
     invariant(
@@ -42,7 +42,7 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
   }
 
   function coerceMapping(prop, mapping) {
-    const { baseUrl, authToken } = _context;
+    const { baseUrl, authToken } = _context
 
     if (Function.prototype.isPrototypeOf(mapping)) {
       return mapping
@@ -59,9 +59,9 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
     mapping = assignDefaults(mapping)
 
     // Add baseUrl
-    mapping.url = `${baseUrl}${mapping.url}`;
+    mapping.url = `${baseUrl}${mapping.url}`
     // Add an authentication header.
-    mapping.headers.Authorization = `bearer ${authToken}`;
+    mapping.headers.Authorization = `bearer ${authToken}`
 
     mapping.equals = function (that) {
       if (this.comparison !== undefined) {
@@ -119,7 +119,7 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
     class RefetchConnect extends Component {
       static contextTypes = {
         baseUrl: PropTypes.string.isRequired,
-        authToken: PropTypes.string.isRequired,
+        authToken: PropTypes.string.isRequired
       };
 
       constructor(props, context) {
