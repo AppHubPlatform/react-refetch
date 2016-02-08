@@ -107,7 +107,12 @@ export default function connect(mapPropsToRequestsToProps, options = {}) {
   }
 
   function handleResponse(response) {
-    const json = response.json() // TODO: support other response types
+    let json;
+    if (response.status === 204) {
+      json = {};
+    } else {
+      json = response.json(); // TODO: support other response types
+    }
     if (response.status >= 200 && response.status < 300) { // TODO: support custom acceptable statuses
       return json
     } else {
